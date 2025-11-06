@@ -3,27 +3,23 @@
 import streamlit as st
 import pandas as pd
 
-# Konfigurasi halaman Streamlit
+# Konfigurasi halaman
 st.set_page_config(page_title="Dashboard KPI", layout="wide")
 st.title("📊 Dashboard KPI")
-st.write("Menampilkan data dari SharePoint (range BQ4:BR42):")
+st.write("Menampilkan data dari sheet STRG cell A1:F1")
 
-# 🔗 Link Excel SharePoint (sudah benar formatnya)
-sharepoint_url = "https://ptpln365-my.sharepoint.com/personal/ivan_falahul_ptpln365_onmicrosoft_com/Documents/002.%20Perencanaan%20UP3%20TLI/999.%20DASHBOARD/NKO%20UP3%20TLI-%20Update.xlsx?raw=1"
+# RAW GitHub URL
+github_excel_url = "https://github.com/UP3Tolis/DASHBOARD/raw/refs/heads/main/NKO%20UP3%20TLI.xlsx"
 
 try:
-    # Baca file Excel dari SharePoint langsung
-    df = pd.read_excel(sharepoint_url, engine="openpyxl")
+    # Baca langsung sheet STRG
+    df = pd.read_excel(github_excel_url, engine="openpyxl", sheet_name="STRG")
 
-    # Karena pandas tidak bisa langsung ambil range, kita slice manual:
-    # BQ = kolom ke-68 (0-based index)
-    # BR = kolom ke-69
-    # Baris 4–42 berarti index 3–41
-    df_range = df.iloc[3:42, 68:70]
+    # Ambil range A1:F1 → baris indeks 0, kolom 0–5
+    df_range = df.iloc[0:1, 0:6]
 
-    # Tampilkan tabel di Streamlit
-    st.subheader("📋 Data KPI (BQ4:BR42)")
+    st.subheader("📋 Data dari STRG (A1:F1)")
     st.dataframe(df_range, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Gagal membaca file: {e}")
+    st.error(f"Gagal membaca file dari GitHub: {e}")
