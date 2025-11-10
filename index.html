@@ -2,15 +2,15 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard KPI UP3 Tolitoli</title>
+<title>Dashboard KPI UP3</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; }
-  #chartContainer { width: 98%; max-width: 1200px; margin-top: 25px; }
-  label { font-weight: bold; margin-right: 10px; }
+  #chartContainer { width: 95%; max-width: 1200px; height: 650px; }
+  select { padding: 6px; margin-bottom: 20px; }
 </style>
 
 </head>
@@ -40,33 +40,41 @@
 
 <script>
 const excelURL = "https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/NKO%20UP3%20TLI.xlsx";
-let dataMatrix = [];
-let labels = [];
+
+let indicatorNames = [];
+let monthMatrix = [];
 let chart;
 
-// Load Excel
 fetch(excelURL)
-  .then(res => res.arrayBuffer())
-  .then(buffer => {
-    const workbook = XLSX.read(buffer, { type: "array" });
-    const sheet = workbook.Sheets["T.UP3"];
-    
-    // Ambil seluruh range KPI
-    const range = XLSX.utils.sheet_to_json(sheet, {
-      header: 1,
-      range: "AS4:BL62"
-    });
+  .then(r => r.arrayBuffer())
+  .then(buf => {
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheet = wb.Sheets["T.UP3"];
 
-    labels = range.map(row => row[0]); // Nama KPI (kolom pertama)
-    dataMatrix = range.map(row => row.slice(1)); // Nilai bulan ke-1 s/d 12
-    
+    // Ambil indikator (AT8:AT62)
+    const indicators = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:AT62" });
+    indicatorNames = indicators.map(row => row[0]);
+
+    // Ambil nilai pencapaian (BA8:BL62) → Jan s/d Des (12 kolom)
+    const values = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "BA8:BL62" });
+    monthMatrix = values.map(row => row.map(v => parseFloat(v) || null));
+
     updateChart(0); // Default: Januari
   });
 
 function updateChart(monthIndex) {
-  const values = dataMatrix.map(row => parseFloat(row[monthIndex]) || 0);
+  const filteredNames = [];
+  const filteredValues = [];
 
-  const colors = values.map(v => {
+  for (let i = 0; i < indicatorNames.length; i++) {
+    const val = monthMatrix[i][monthIndex];
+    if (val !== null && val !== 0 && val !== "") {
+      filteredNames.push(indicatorNames[i]);
+      filteredValues.push(val);
+    }
+  }
+
+  const colors = filteredValues.map(v => {
     if (v >= 100) return "green";
     if (v >= 90) return "gold";
     return "red";
@@ -78,26 +86,25 @@ function updateChart(monthIndex) {
   chart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: labels,
+      labels: filteredNames,
       datasets: [{
         label: "Realisasi (%)",
-        data: values,
+        data: filteredValues,
         backgroundColor: colors
       }]
     },
     options: {
+      indexAxis: 'y',  // ← Horizontal bar
       responsive: true,
-      maintainAspectRatio: false,
       scales: {
-        y: { beginAtZero: true, max: 130 }
+        x: { beginAtZero: true, max: 130 }
       }
     }
   });
 }
 
-document.getElementById("monthSelector").addEventListener("change", function() {
-  updateChart(parseInt(this.value));
-});
+document.getElementById("monthSelector")
+  .addEventListener("change", e => updateChart(parseInt(e.target.value)));
 </script>
 
 </body>
