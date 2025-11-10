@@ -9,7 +9,7 @@
 
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; }
-  #chartContainer { width: 95%; max-width: 1200px; height: 650px; }
+  #chartContainer { width: 70%; max-width: 900px; } /* Lebar dipersempit */
   select { padding: 6px; margin-bottom: 20px; }
 </style>
 
@@ -50,16 +50,12 @@ fetch(excelURL)
   .then(buf => {
     const wb = XLSX.read(buf, { type: "array" });
     const sheet = wb.Sheets["T.UP3"];
+    const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:BL62" });
 
-    // Ambil indikator (AT8:AT62)
-    const indicators = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:AT62" });
-    indicatorNames = indicators.map(row => row[0]);
+    indicatorNames = raw.map(r => r[0]);
+    monthMatrix = raw.map(r => r.slice(7, 19)); 
 
-    // Ambil nilai pencapaian (BA8:BL62) → Jan s/d Des (12 kolom)
-    const values = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "BA8:BL62" });
-    monthMatrix = values.map(row => row.map(v => parseFloat(v) || null));
-
-    updateChart(0); // Default: Januari
+    updateChart(0);
   });
 
 function updateChart(monthIndex) {
@@ -68,37 +64,54 @@ function updateChart(monthIndex) {
 
   for (let i = 0; i < indicatorNames.length; i++) {
     const val = monthMatrix[i][monthIndex];
-    if (val !== null && val !== 0 && val !== "") {
-      filteredNames.push(indicatorNames[i]);
-      filteredValues.push(val);
-    }
+    if (val === null || val === "" || val === 0 || isNaN(val)) continue;
+
+    let label = indicatorNames[i];
+    if (label.length > 30) label = label.substring(0, 30) + "...";
+
+    filteredNames.push(label);
+    filteredValues.push(Number(val));
   }
 
   const colors = filteredValues.map(v => {
     if (v >= 100) return "green";
-    if (v >= 90) return "orange";
+    if (v >= 90) return "gold";
     return "red";
   });
 
+  const canvas = document.getElementById("kpiChart");
+  canvas.height = filteredNames.length * 18; /* Tinggi bar ditambah */
+
   if (chart) chart.destroy();
-  const ctx = document.getElementById("kpiChart").getContext("2d");
+  const ctx = canvas.getContext("2d");
 
   chart = new Chart(ctx, {
     type: "bar",
     data: {
       labels: filteredNames,
       datasets: [{
-        label: "Realisasi (%)",
         data: filteredValues,
-        backgroundColor: colors
+        backgroundColor: colors,
+        barPercentage: 0.7, /* jarak antar bar */
+        categoryPercentage: 0.7 
       }]
     },
     options: {
-      indexAxis: 'y',  // ← Horizontal bar
+      indexAxis: 'y',
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
-        x: { beginAtZero: true, max: 130 }
-      }
+        x: { 
+          beginAtZero: true, 
+          max: 120, 
+          grid: { display: false } /* Hapus gridlines */
+        },
+        y: { 
+          ticks: { font: { size: 9, weight: "bold" } },
+          grid: { display: false }
+        }
+      },
+      plugins: { legend: { display: false } }
     }
   });
 }
