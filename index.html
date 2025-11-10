@@ -2,61 +2,102 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Preview Data KPI</title>
+<title>Dashboard KPI UP3 Tolitoli</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; }
-  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-  th, td { border: 1px solid #aaa; padding: 6px; text-align: center; }
-  th { background: #eee; }
+  #chartContainer { width: 98%; max-width: 1200px; margin-top: 25px; }
+  label { font-weight: bold; margin-right: 10px; }
 </style>
 
 </head>
 <body>
 
-<h2>Preview Data AS4:BL62 dari Sheet "T.UP3"</h2>
-<p>Jika tabel tampil benar, kita lanjut buat grafik.</p>
+<h2>Dashboard KPI UP3 Tolitoli</h2>
 
-<table id="dataTable"></table>
+<label>Pilih Bulan:</label>
+<select id="monthSelector">
+  <option value="0">Januari</option>
+  <option value="1">Februari</option>
+  <option value="2">Maret</option>
+  <option value="3">April</option>
+  <option value="4">Mei</option>
+  <option value="5">Juni</option>
+  <option value="6">Juli</option>
+  <option value="7">Agustus</option>
+  <option value="8">September</option>
+  <option value="9">Oktober</option>
+  <option value="10">November</option>
+  <option value="11">Desember</option>
+</select>
+
+<div id="chartContainer">
+  <canvas id="kpiChart"></canvas>
+</div>
 
 <script>
 const excelURL = "https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/NKO%20UP3%20TLI.xlsx";
+let dataMatrix = [];
+let labels = [];
+let chart;
 
-function loadExcel() {
-  fetch(excelURL)
-    .then(res => res.arrayBuffer())
-    .then(buffer => {
-      const workbook = XLSX.read(buffer, { type: "array" });
-      const sheet = workbook.Sheets["T.UP3"]; // PENTING: pilih sheet ini
-
-      // Ambil range AS4:BL62
-      const range = XLSX.utils.sheet_to_json(sheet, {
-        header: 1,
-        range: "AS4:BL62" // Range sesuai permintaan
-      });
-
-      renderTable(range);
+// Load Excel
+fetch(excelURL)
+  .then(res => res.arrayBuffer())
+  .then(buffer => {
+    const workbook = XLSX.read(buffer, { type: "array" });
+    const sheet = workbook.Sheets["T.UP3"];
+    
+    // Ambil seluruh range KPI
+    const range = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      range: "AS4:BL62"
     });
-}
 
-function renderTable(data) {
-  const table = document.getElementById("dataTable");
-  table.innerHTML = "";
+    labels = range.map(row => row[0]); // Nama KPI (kolom pertama)
+    dataMatrix = range.map(row => row.slice(1)); // Nilai bulan ke-1 s/d 12
+    
+    updateChart(0); // Default: Januari
+  });
 
-  data.forEach(row => {
-    const tr = document.createElement("tr");
-    row.forEach(cell => {
-      const td = document.createElement("td");
-      td.textContent = cell !== undefined ? cell : "";
-      tr.appendChild(td);
-    });
-    table.appendChild(tr);
+function updateChart(monthIndex) {
+  const values = dataMatrix.map(row => parseFloat(row[monthIndex]) || 0);
+
+  const colors = values.map(v => {
+    if (v >= 100) return "green";
+    if (v >= 90) return "gold";
+    return "red";
+  });
+
+  if (chart) chart.destroy();
+  const ctx = document.getElementById("kpiChart").getContext("2d");
+
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Realisasi (%)",
+        data: values,
+        backgroundColor: colors
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, max: 130 }
+      }
+    }
   });
 }
 
-loadExcel();
+document.getElementById("monthSelector").addEventListener("change", function() {
+  updateChart(parseInt(this.value));
+});
 </script>
 
 </body>
