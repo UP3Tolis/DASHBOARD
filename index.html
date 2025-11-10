@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard KPI UP3 Tolitoli</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  #chartContainer { width: 95%; max-width: 1200px; margin-top: 20px; }
+</style>
+
+</head>
+<body>
+
+<h2>Dashboard KPI UP3 Tolitoli</h2>
+
+<label>Pilih Bulan: </label>
+<select id="monthSelector">
+  <option value="8">Januari</option>
+  <option value="9">Februari</option>
+  <option value="10">Maret</option>
+  <option value="11">April</option>
+  <option value="12">Mei</option>
+  <option value="13">Juni</option>
+  <option value="14">Juli</option>
+  <option value="15">Agustus</option>
+  <option value="16">September</option>
+  <option value="17">Oktober</option>
+  <option value="18">November</option>
+  <option value="19">Desember</option>
+</select>
+
+<div id="chartContainer">
+  <canvas id="kpiChart"></canvas>
+</div>
+
+<script>
+const excelURL = "https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/NKO%20UP3%20TLI.xlsx";
+
+let chart;
+let sheetData = [];
+
+function loadExcel() {
+  fetch(excelURL)
+    .then(res => res.arrayBuffer())
+    .then(buffer => {
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      updateChart(8);
+    });
+}
+
+function updateChart(monthIndex) {
+  const labels = [];
+  const values = [];
+
+  // range data AS4:BL62 → dalam array kira-kira index baris 3 sampai 61
+  for (let i = 3; i <= 61; i++) {
+    const row = sheetData[i];
+    if (!row) continue;
+    const kpiName = row[1];
+    const val = parseFloat(row[monthIndex]);
+    if (!isNaN(val)) {
+      labels.push(kpiName);
+      values.push(val);
+    }
+  }
+
+  if (chart) chart.destroy();
+
+  const ctx = document.getElementById("kpiChart").getContext("2d");
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Realisasi KPI",
+        data: values,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }},
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true }
+      }
+    }
+  });
+}
+
+document.getElementById("monthSelector").addEventListener("change", function() {
+  updateChart(parseInt(this.value));
+});
+
+loadExcel();
+</script>
+
+</body>
+</html>
