@@ -131,6 +131,7 @@ fetch(excelURL)
     const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:BL62" });
 
     indicatorNames = raw.map(r => r[0]);
+    filterIndicator = raw.map(r => r[1]);
     monthMatrix = raw.map(r => r.slice(7, 19));
 
     updateChart(0);
@@ -142,7 +143,10 @@ function updateChart(monthIndex) {
 
   for (let i = 0; i < indicatorNames.length; i++) {
     const val = monthMatrix[i][monthIndex];
-    if (!val || isNaN(val)) continue;
+    const filter = filterIndicator[i];
+
+    // Skip jika filter = 0 atau kosong
+    if (filter === 0 || filter === "0" || filter === "" || filter === null) continue;
 
     let label = indicatorNames[i];
     if (label.length > 30) label = label.substring(0, 30) + "...";
@@ -196,6 +200,7 @@ function updateChart(monthIndex) {
     }
   });
 }
+
 
 document.getElementById("monthSelector").addEventListener("change", e => updateChart(parseInt(e.target.value)));
 </script>
