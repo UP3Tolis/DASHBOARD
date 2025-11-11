@@ -6,36 +6,114 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; }
-  #chartContainer { width: 70%; max-width: 900px; } /* Lebar dipersempit */
-  select { padding: 6px; margin-bottom: 20px; }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f7f9fb;
+  }
+
+  /* NAVBAR */
+  .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 28px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+  }
+
+  .navbar .left, .navbar .center, .navbar .right {
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar img {
+    height: 38px;
+    margin-right: 12px;
+  }
+
+  .menu a {
+    margin: 0 18px;
+    font-size: 14px;
+    color: #002c5f;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .menu a:hover {
+    color: #0077ff;
+  }
+
+  /* MAIN CONTENT */
+  #main {
+    padding: 110px 35px 40px;
+  }
+
+  #chartContainer {
+    width: 35%;
+    max-width: 900px;
+    min-width: 480px;
+  }
+
+  select {
+    padding: 6px;
+    margin-bottom: 25px;
+  }
 </style>
 
 </head>
 <body>
 
-<h2>Dashboard KPI UP3 Tolitoli</h2>
+<!-- NAVIGATION BAR -->
+<div class="navbar">
+  <div class="left">
+    <!-- GANTI LOGO DI SINI -->
+    <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Logo_PLN.png">
+    <strong>Dashboard KPI UP3 Tolitoli</strong>
+  </div>
 
-<label>Pilih Bulan:</label>
-<select id="monthSelector">
-  <option value="0">Januari</option>
-  <option value="1">Februari</option>
-  <option value="2">Maret</option>
-  <option value="3">April</option>
-  <option value="4">Mei</option>
-  <option value="5">Juni</option>
-  <option value="6">Juli</option>
-  <option value="7">Agustus</option>
-  <option value="8">September</option>
-  <option value="9">Oktober</option>
-  <option value="10">November</option>
-  <option value="11">Desember</option>
-</select>
+  <div class="center menu">
+    <a href="#">Dashboard</a>
+    <a href="#">Laporan</a>
+    <a href="#">Rencana Kerja</a>
+    <a href="#">Target</a>
+    <a href="#">Pengaturan</a>
+  </div>
 
-<div id="chartContainer">
-  <canvas id="kpiChart"></canvas>
+  <div class="right">
+    <span>ID ▾</span>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+  <label>Pilih Bulan:</label>
+  <select id="monthSelector">
+    <option value="0">Januari</option>
+    <option value="1">Februari</option>
+    <option value="2">Maret</option>
+    <option value="3">April</option>
+    <option value="4">Mei</option>
+    <option value="5">Juni</option>
+    <option value="6">Juli</option>
+    <option value="7">Agustus</option>
+    <option value="8">September</option>
+    <option value="9">Oktober</option>
+    <option value="10">November</option>
+    <option value="11">Desember</option>
+  </select>
+
+  <div id="chartContainer">
+    <canvas id="kpiChart"></canvas>
+  </div>
 </div>
 
 <script>
@@ -53,7 +131,7 @@ fetch(excelURL)
     const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:BL62" });
 
     indicatorNames = raw.map(r => r[0]);
-    monthMatrix = raw.map(r => r.slice(7, 19)); 
+    monthMatrix = raw.map(r => r.slice(7, 19));
 
     updateChart(0);
   });
@@ -64,7 +142,7 @@ function updateChart(monthIndex) {
 
   for (let i = 0; i < indicatorNames.length; i++) {
     const val = monthMatrix[i][monthIndex];
-    if (val === null || val === "" || val === 0 || isNaN(val)) continue;
+    if (!val || isNaN(val)) continue;
 
     let label = indicatorNames[i];
     if (label.length > 30) label = label.substring(0, 30) + "...";
@@ -75,12 +153,12 @@ function updateChart(monthIndex) {
 
   const colors = filteredValues.map(v => {
     if (v >= 100) return "green";
-    if (v >= 90) return "gold";
+    if (v >= 95) return "orange";
     return "red";
   });
 
   const canvas = document.getElementById("kpiChart");
-  canvas.height = filteredNames.length * 18; /* Tinggi bar ditambah */
+  canvas.height = filteredNames.length * 18;
 
   if (chart) chart.destroy();
   const ctx = canvas.getContext("2d");
@@ -92,32 +170,34 @@ function updateChart(monthIndex) {
       datasets: [{
         data: filteredValues,
         backgroundColor: colors,
-        barPercentage: 0.7, /* jarak antar bar */
-        categoryPercentage: 0.7 
+        barPercentage: 0.7,
+        categoryPercentage: 0.7
       }]
     },
+    plugins: [ChartDataLabels],
     options: {
       indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        x: { 
-          beginAtZero: true, 
-          max: 120, 
-          grid: { display: false } /* Hapus gridlines */
-        },
-        y: { 
-          ticks: { font: { size: 9, weight: "bold" } },
-          grid: { display: false }
-        }
+        x: { beginAtZero: true, max: 120, grid: { display: false }},
+        y: { ticks: { font: { size: 11 }}, grid: { display: false }}
       },
-      plugins: { legend: { display: false } }
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: "end",
+          align: "right",
+          formatter: value => value.toFixed(2),
+          font: { size: 11, weight: "bold" },
+          color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex]
+        }
+      }
     }
   });
 }
 
-document.getElementById("monthSelector")
-  .addEventListener("change", e => updateChart(parseInt(e.target.value)));
+document.getElementById("monthSelector").addEventListener("change", e => updateChart(parseInt(e.target.value)));
 </script>
 
 </body>
