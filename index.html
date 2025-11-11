@@ -142,17 +142,20 @@ function updateChart(monthIndex) {
   const filteredValues = [];
 
   for (let i = 0; i < indicatorNames.length; i++) {
+    const filterFlag = filterIndicator[i];
     const val = monthMatrix[i][monthIndex];
-    const filter = filterIndicator[i];
 
-    // Skip jika filter = 0 atau kosong
-    if (filter === 0 || filter === "0" || filter === "" || filter === null) continue;
+    // Skip yang flag kolom AU nya KOSONG
+    if (filterFlag === "" || filterFlag === null || filterFlag === undefined) continue;
+
+    // Tetap tampilkan meskipun nilai 0
+    const value = Number(val ?? 0);
 
     let label = indicatorNames[i];
     if (label.length > 30) label = label.substring(0, 30) + "...";
 
     filteredNames.push(label);
-    filteredValues.push(Number(val));
+    filteredValues.push(value);
   }
 
   const colors = filteredValues.map(v => {
