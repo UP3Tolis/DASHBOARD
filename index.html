@@ -15,6 +15,9 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 ul {
@@ -110,15 +113,45 @@ ul li a:hover {
   padding: 10px;
   height: 200px;
 }
-.kiri{
-  background-color: #ff9999;
+
+/* Container for flexboxes */
+.row {
+  display: -webkit-flex;
+  display: flex;
 }
-.tengah{
-  background-color: #99ff99;
+
+/* Create three unequal columns that sits next to each other */
+.column {
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
 }
-.kanan{
-  background-color: #9999ff;
+
+/* Left and right column */
+.column.side {
+   -webkit-flex: 1;
+   -ms-flex: 1;
+   flex: 1;
 }
+
+/* Middle column */
+.column.middle {
+  -webkit-flex: 2;
+  -ms-flex: 2;
+  flex: 2;
+}
+
+.column.botside {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.column.botmid {
+  -webkit-flex: 3;
+  -ms-flex: 3;
+  flex: 3;
+}
+
 /* Style the footer */
 .footer {
   grid-area: footer;
@@ -153,16 +186,44 @@ select:focus {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
+
+.canvas-container {
+  display: flex;
+  justify-content: center;   /* tengah secara horizontal */
+  align-items: center;       /* tengah secara vertikal */
+  height: 100vh;             /* penuh 1 layar (viewport height) */
+  width: 100%;
+  background-color: #f5f5f5; /* opsional */
+}
 canvas {
   width: 100% !important;
   height: 100% !important;       /* tinggi otomatis sesuai rasio */
-  max-height: 800px;              /* tinggi maksimum 900px */
+  max-height: 90vh;              /* tinggi maksimum 900px */
   max-width: 700px;              /* lebar maksimum 600px */
   border: 1px solid #ccc;        /* garis pinggir halus */
   border-radius: 8px;            /* sudut membulat */
   background-color: #fff;        /* latar putih bersih */
   box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* bayangan halus */
   padding: 10px;                 /* ruang dalam */
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  background: #f2f2f2;
+  border-radius: 20px;
+  padding: 10px 15px;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  gap: 20px; /* jarak antar card */
+  margin-bottom: 28px;
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
 /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
@@ -232,14 +293,55 @@ canvas {
         <div><strong>ULP MOUTONG</strong></div>
         <canvas id="trend-T.MOUTONG" width="300" height="60"></canvas>
       </div>
-     </div>
-     <p> aku di bawah kolom</p>
-   </div>  
+    </div>
+    <p>---</p>
 
-  <div class="footer">
-    <p>Footer 1</p>
-    <p>Footer 2</p>
-  </div>
+    <div class="row">
+      <div class="column side" style="background-color:#bbb;">
+        <canvas id="donutChart" width="300" height="300"></canvas>
+      </div>
+      
+      <div class="column side" style="background-color:#bbb; align-items: center; justify-content: center;">
+        
+        <div class="card">
+          <div class="circle" style="background-color: lime;"></div>
+          <div class="text">
+            <div>KPI: <b id="greenKPIValue">6</b> Indikator</div>
+            <hr>
+            <div>PI&nbsp;&nbsp;: <b id="greenPIValue"></b> Indikator</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="circle" style="background-color: orange;"></div>
+          <div class="text">
+            <div>KPI: <b id="yellowKPIValue">0</b> Indikator</div> <!-- Tambahkan ID ini -->
+            <hr>
+            <div>PI&nbsp;&nbsp;: <b id="yellowPIValue">0</b> Indikator</div> <!-- Tambahkan ID ini -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="circle" style="background-color: red;"></div>
+          <div class="text">
+            <div>KPI: <b id="redKPIValue">0</b> Indikator</div> <!-- Tambahkan ID ini -->
+            <hr>
+            <div>PI&nbsp;&nbsp;: <b id="redPIValue">0</b> Indikator</div> <!-- Tambahkan ID ini -->
+          </div>
+        </div>
+
+      </div>
+        <div class="column middle" style="background-color:#bbb;">
+          <canvas id="underTargetChart"></canvas>
+        </div>
+    </div>
+    <p>---</p>
+
+    <div class="row">
+      <div class="column botmid" style="background-color:#aaa;"> kiri bawah</div>
+      <div class="column botside" style="background-color:#ccc;"> kanan bawah</div>
+    </div>
+   </div>  
 </div>
 
 <script>
@@ -285,7 +387,7 @@ canvas {
         if (!el) return;
         const fullLabels = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"," "];
         const src = trendData[name] || Array(13).fill(null);
-        // tampilkan semua bulan (Jan s/d Des)
+        
         const values = src.map(v => Number(v ?? 0));
 
         if (trendCharts[name]) {
@@ -329,6 +431,14 @@ canvas {
     const filteredNames = [];
     const filteredValues = [];
 
+    let greenKPI = 0;
+    let yellowKPI = 0;
+    let redKPI = 0;
+
+    let greenPI = 0;
+    let yellowPI = 0;
+    let redPI = 0;
+
     for (let i = 0; i < indicatorNames.length; i++) {
       const filterFlag = filterIndicator[i];
       const val = monthMatrix[i][monthIndex];
@@ -345,6 +455,121 @@ canvas {
       filteredNames.push(label);
       filteredValues.push(value);
     }
+
+    // Hitung greenKPI, yellowKPI, redKPI, dll.
+    for (let i = 0; i < filteredValues.length; i++) {
+      const value = filteredValues[i];
+
+      if (i < 7) {
+        if (value >= 100) {
+          greenKPI++;
+        } else if (value >= 95) {
+          yellowKPI++;
+        } else {
+          redKPI++;
+        }
+      } else {
+        if (value >= 100) {
+          greenPI++;
+        } else if (value >= 95) {
+          yellowPI++;
+        } else {
+          redPI++;
+        }
+      }
+    }
+
+    console.log("Green KPI:", greenKPI);
+    console.log("Green PI:", greenPI);
+
+    // Update nilai KPI di card
+    document.getElementById("greenKPIValue").innerText = greenKPI; // Update nilai greenKPI
+    document.getElementById("greenPIValue").innerText = greenPI; // Update nilai greenKPI
+    document.getElementById("yellowKPIValue").innerText = yellowKPI; // Update nilai yellowKPI
+    document.getElementById("yellowPIValue").innerText = yellowPI; // Update nilai yellowPI
+    document.getElementById("redKPIValue").innerText = redKPI; // Update nilai redKPI
+    document.getElementById("redPIValue").innerText = redPI; // Update nilai redPI
+
+    // Hitung total indikator
+    const totalIndicators = greenKPI + yellowKPI + redKPI + greenPI + yellowPI + redPI;
+
+    // Data untuk donut chart
+    const donutData = {
+      labels: ['Green KPI', 'Yellow KPI', 'Red KPI'],
+      datasets: [{
+        data: [greenKPI + greenPI, yellowKPI + yellowPI, redKPI + redPI],
+        backgroundColor: ['#4caf50', '#ff9800', '#f44336'],
+        hoverOffset: 4
+      }]
+    };
+
+    // Buat donut chart
+    const donutCtx = document.getElementById('donutChart').getContext('2d');
+    if (window.donutChart && typeof window.donutChart.destroy === 'function') {
+      window.donutChart.destroy(); // Hancurkan chart sebelumnya jika ada
+    }
+
+    const totalFormatted = totalIndicators.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); // contoh "102,3"
+
+    window.donutChart = new Chart(donutCtx, {
+      type: 'doughnut',
+      data: donutData,
+      plugins: [
+        // plugin custom untuk gambar teks di tengah
+        {
+          id: 'centerText',
+          beforeDraw(chart, args, options) {
+            const { ctx, chartArea: { left, right, top, bottom } } = chart;
+            const centerX = (left + right) / 2;
+            const centerY = (top + bottom) / 2;
+            ctx.save();
+
+            // angka besar (total)
+            ctx.fillStyle = options.color || '#333';
+            ctx.font = `${options.fontWeight || 'bold'} ${options.fontSize || '40px'} ${options.fontFamily || 'Arial'}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(options.text || '', centerX, centerY - (options.offsetY || 6));
+
+            // sublabel (kata "INDICATOR")
+            if (options.subtext) {
+              ctx.fillStyle = options.subColor || '#0077cc';
+              ctx.font = `${options.subFontWeight || '600'} ${options.subFontSize || '14px'} ${options.fontFamily || 'Arial'}`;
+              ctx.fillText(options.subtext, centerX, centerY + (options.subOffsetY || 26));
+            }
+
+            ctx.restore();
+          }
+        }
+      ],
+      options: {
+        responsive: true,
+        cutout: '70%',
+        elements: { arc: { borderWidth: 2 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (tooltipItem) {
+                const label = tooltipItem.label || '';
+                const value = tooltipItem.raw || 0;
+                return `${label}: ${value} (${((value / totalIndicators) * 100).toFixed(2)}%)`;
+              }
+            }
+          },
+          datalabels: { display: false },
+          // konfigurasi plugin centerText (opsi dikirim ke plugin custom di atas)
+          centerText: {
+            text: totalFormatted,        // mis. "102,3"
+            subtext: 'INDICATOR',
+            color: '#333',
+            subColor: '#0077cc',
+            fontSize: '40px',
+            subFontSize: '14px'
+          }
+        }
+      }
+    });
 
     const colors = filteredValues.map(v => {
       if (v >= 100) return "green";
@@ -395,17 +620,84 @@ canvas {
         }
       }
     });
+
+      // Buat bar chart untuk indikator dibawah target (kuning & merah saja, tanpa sort)
+      const underTargetIndices = [];
+      const underTargetNames = [];
+      const underTargetValues = [];
+      const underTargetColors = [];
+
+      filteredNames.forEach((name, i) => {
+        const value = filteredValues[i];
+        if (value < 100) { // kuning (95-99) atau merah (< 95)
+          underTargetNames.push(name);
+          underTargetValues.push(value);
+          if (value >= 95) {
+            underTargetColors.push("orange");
+          } else {
+            underTargetColors.push("red");
+          }
+        }
+      });
+
+      const underTargetCanvas = document.getElementById('underTargetChart');
+      if (!underTargetCanvas) {
+        console.warn('Canvas underTargetChart tidak ditemukan');
+        return;
+      }
+
+      underTargetCanvas.height = underTargetNames.length * 18;
+
+      const underTargetCtx = underTargetCanvas.getContext('2d');
+      if (window.underTargetChart && typeof window.underTargetChart.destroy === 'function') {
+        window.underTargetChart.destroy();
+      }
+
+      window.underTargetChart = new Chart(underTargetCtx, {
+        type: 'bar',
+        data: {
+          labels: underTargetNames,
+          datasets: [{
+            data: underTargetValues,
+            backgroundColor: underTargetColors,
+            barPercentage: 0.7,
+            categoryPercentage: 0.7
+          }]
+        },
+        plugins: [ChartDataLabels],
+        options: {
+          indexAxis: 'y',
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              right: 0,
+              left: 0
+            }
+          },
+          scales: {
+            x: { beginAtZero: true, max: 125, grid: { display: false }, ticks: { display: false } },
+            y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+          },
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: 'end',
+              align: 'right',
+              formatter: value => value.toFixed(2),
+              font: { size: 11, weight: 'bold' },
+              color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex]
+            }
+          }
+        }
+      });
   }
 
   document.getElementById("monthSelector").addEventListener("change", e => {
     const m = parseInt(e.target.value);
     updateChart(m);
-    // updatetolisTrendChart(m);
   });
 </script>
 
 </body>
 
 </html>
-
-
