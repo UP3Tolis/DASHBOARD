@@ -7,6 +7,7 @@ let filterIndicator = [];
 
 let tolisValues = [];
 let tolisTrendChart;
+let trendBottomRow = []; // <-- simpan nilai BW69:CH69
 
 // Load data from Excel
 async function loadExcelData() {
@@ -22,6 +23,10 @@ async function loadExcelData() {
     indicatorNames = raw.map(r => r[0]);
     filterIndicator = raw.map(r => r[1]);
     monthMatrix = raw.map(r => r.slice(7, 19));
+
+    // baca nilai pusat (BW69:CH69) sekali dan simpan
+    const bwRow = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "BW69:CH69" })[0] || [];
+    trendBottomRow = bwRow.map(v => Number(v ?? 0));
 
     // Load trend data for multiple sheets
     const sheetNames = ["T.TOLIS", "T.BANGKIR", "T.KOTARAYA", "T.LEOK", "T.MOUTONG"];
@@ -70,15 +75,16 @@ function buildOrUpdateTrend(name, trendData, trendCharts) {
   el.height = Math.round(visualH * DPR);
 
   trendCharts[name] = new Chart(el.getContext('2d'), {
-    type: 'line',
+    type: 'bar',
     data: {
       labels: fullLabels,
       datasets: [{
         data: values,
+        backgroundColor: '#0077ff',
         borderColor: "#0077ff",
-        borderWidth: 2,
+        borderWidth: 1,
         pointRadius: 4,
-        pointBackgroundColor: "#0077ff",
+        pointBackgroundColor: "#2f00ffff",
         spanGaps: false
       }]
     },
@@ -87,7 +93,7 @@ function buildOrUpdateTrend(name, trendData, trendCharts) {
       responsive: false,
       maintainAspectRatio: true,
       scales: {
-        y: { beginAtZero: true, max: 120, grid: { display: false }, ticks: { display: false } },
+        y: { beginAtZero: true, max: 130, grid: { display: false }, ticks: { display: false } },
         x: { grid: { display: false }, ticks: { display: false } }
       },
       plugins: {
@@ -150,7 +156,11 @@ function updateChart(monthIndex) {
   const totalIndicators = greenKPI + yellowKPI + redKPI + greenPI + yellowPI + redPI;
 
   // Create donut chart
-  createDonutChart(greenKPI, yellowKPI, redKPI, greenPI, yellowPI, redPI, totalIndicators);
+  // ambil nilai tengah dari sheet jika ada (sesuai bulan)
+  const centerSheetValue = (Array.isArray(trendBottomRow) && typeof trendBottomRow[monthIndex] !== 'undefined')
+    ? trendBottomRow[monthIndex]
+    : null;
+  createDonutChart(greenKPI, yellowKPI, redKPI, greenPI, yellowPI, redPI, totalIndicators, centerSheetValue);
 
   // Create main bar chart
   createKPIChart(filteredNames, filteredValues);
@@ -162,13 +172,15 @@ function updateChart(monthIndex) {
   createTrendBottomChart();
 }
 
-function createDonutChart(gKPI, yKPI, rKPI, gPI, yPI, rPI, total) {
+function createDonutChart(gKPI, yKPI, rKPI, gPI, yPI, rPI, total, totalFromSheet) {
   const donutCtx = document.getElementById('donutChart').getContext('2d');
   if (window.donutChart && typeof window.donutChart.destroy === 'function') {
     window.donutChart.destroy();
   }
 
-  const totalFormatted = total.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  // pilih nilai tengah: jika ada nilai dari sheet gunakan itu, kalau tidak pakai totalIndicators
+  const centerValue = (typeof totalFromSheet === 'number' && !isNaN(totalFromSheet)) ? totalFromSheet : total;
+  const totalFormatted = Number(centerValue).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   window.donutChart = new Chart(donutCtx, {
     type: 'doughnut',
@@ -223,7 +235,7 @@ function createDonutChart(gKPI, yKPI, rKPI, gPI, yPI, rPI, total) {
         datalabels: { display: false },
         centerText: {
           text: totalFormatted,
-          subtext: 'INDICATOR',
+          subtext: '',
           color: '#333',
           subColor: '#0077cc',
           fontSize: '40px',
