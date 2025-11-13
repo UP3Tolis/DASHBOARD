@@ -338,8 +338,12 @@ canvas {
     <p>---</p>
 
     <div class="row">
-      <div class="column botmid" style="background-color:#aaa;"> kiri bawah</div>
-      <div class="column botside" style="background-color:#ccc;"> kanan bawah</div>
+      <div class="column botmid" style="background-color:#bbb;"> 
+        <canvas id="trendBottomChart"></canvas>
+      </div>
+      <div class="column botside" style="background-color:#bbb;">
+         <img src="https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/BERSINAR%20LOGO.png" alt="Bersinar Logo" style="max-width: 100%; height: auto; padding: 10px;">
+      </div>
     </div>
    </div>  
 </div>
@@ -690,6 +694,72 @@ canvas {
           }
         }
       });
+
+      // Buat bar chart dari data T.UP3 BW69:CH69 (tren indikator)
+      fetch(excelURL)
+        .then(r => r.arrayBuffer())
+        .then(buf => {
+          const wb = XLSX.read(buf, { type: "array" });
+          const sheet = wb.Sheets["T.UP3"];
+          
+          const trendBottomData = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "BW69:CH69" })[0] || [];
+          const monthLabels = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+          const trendValues = trendBottomData.map(v => Number(v ?? 0));
+
+          const trendBottomCanvas = document.getElementById('trendBottomChart');
+          if (!trendBottomCanvas) {
+            console.warn('Canvas trendBottomChart tidak ditemukan');
+            return;
+          }
+
+          const trendBottomCtx = trendBottomCanvas.getContext('2d');
+          if (window.trendBottomChart && typeof window.trendBottomChart.destroy === 'function') {
+            window.trendBottomChart.destroy();
+          }
+
+          window.trendBottomChart = new Chart(trendBottomCtx, {
+            type: 'bar',
+            data: {
+              labels: monthLabels,
+              datasets: [{
+                label: 'Tren Indikator',
+                data: trendValues,
+                backgroundColor: '#0077ff',
+                borderColor: '#0055cc',
+                borderWidth: 1,
+               barPercentage: 0.5,        // kurangi lebar bar (default 0.9)
+               categoryPercentage: 0.7    // kurangi gap antar kategori
+              }]
+            },
+            plugins: [ChartDataLabels],
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 130,
+                  grid: { display: false },
+                  ticks: { display: false }
+                },
+                x: {
+                  grid: { display: false },
+                  ticks: { font: { size: 11 } }
+                }
+              },
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  anchor: 'end',
+                  align: 'top',
+                  formatter: value => value.toFixed(2),
+                  font: { size: 10, weight: 'bold' },
+                  color: '#000'  // Orange terang agar terlihat
+                }
+              }
+            }
+          });
+        });
   }
 
   document.getElementById("monthSelector").addEventListener("change", e => {
