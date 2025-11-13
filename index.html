@@ -3,11 +3,6 @@
 <head>
 <title>DASHBOARD UP3 TOLITOLI</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-
-
 <style>
 * {
   box-sizing: border-box;
@@ -111,7 +106,6 @@ ul li a:hover {
 .leokChartgrid,
 .moutongChartgrid{
   padding: 10px;
-  height: 200px;
 }
 
 /* Container for flexboxes */
@@ -226,6 +220,21 @@ canvas {
   margin-right: 10px;
 }
 
+/* Page visibility */
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+/* Highlight active menu */
+ul li a.active {
+  background-color: #111111;
+  border-bottom: 3px solid #007bff;
+}
+
 /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
 @media (max-width: 600px) {
   .grid-container  {
@@ -256,527 +265,155 @@ canvas {
   <div class="logo">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Logo_PLN.svg/1024px-Logo_PLN.svg.png" alt="PLN Logo">
   </div>
-  <li><a href="#DASHBOARD">DASHBOARD</a></li>
-  <li><a href="#INDICATOR">INDICATOR</a></li>
-  <li><a href="#ULP">UNIT LAYANAN PELANGGAN</a></li>
-  <li><a href="#BANK">DATA</a></li>
+  <li><a href="#" onclick="showPage('dashboard', this); return false;">DASHBOARD</a></li>
+  <li><a href="#" onclick="showPage('indicator', this); return false;">INDICATOR</a></li>
+  <li><a href="#" onclick="showPage('ulp', this); return false;">UNIT LAYANAN PELANGGAN</a></li>
+  <li><a href="#" onclick="showPage('data', this); return false;">DATA</a></li>
 </ul>
 
-<div class="grid-container">
-  
-  <div class="left" style="background-color:#aaa;">
-    <select id="monthSelector">
-      <option value="0">Januari</option>
-      <option value="1">Februari</option>
-      <option value="2">Maret</option>
-      <option value="3">April</option>
-      <option value="4">Mei</option>
-      <option value="5">Juni</option>
-      <option value="6">Juli</option>
-      <option value="7">Agustus</option>
-      <option value="8">September</option>
-      <option value="9">Oktober</option>
-      <option value="10">November</option>
-      <option value="11">Desember</option>
-    </select>
-
-    <canvas id="kpiChart"></canvas>
-  </div>
-
-  <div class="middle" style="background-color:#bbb;">
-    <div class="test_container">
-      <div class="tolisChartgrid">
-        <div><strong>KC  TOLITOLI</strong></div>
-        <canvas id="trend-T.TOLIS" width="300" height="60"></canvas>
-      </div>
-      <div class="bangkirChartgrid">
-        <div><strong>ULP BANGKIR</strong></div>
-        <canvas id="trend-T.BANGKIR" width="300" height="60"></canvas>
-      </div>
-      <div class="kotarayaChartgrid">
-        <div><strong>ULP KOTARAYA</strong></div>
-        <canvas id="trend-T.KOTARAYA" width="300" height="60"></canvas>
-      </div>
-      <div class="leokChartgrid">
-        <div><strong>ULP LEOK</strong></div>
-        <canvas id="trend-T.LEOK" width="300" height="60"></canvas>
-      </div>
-      <div class="moutongChartgrid">
-        <div><strong>ULP MOUTONG</strong></div>
-        <canvas id="trend-T.MOUTONG" width="300" height="60"></canvas>
-      </div>
+<!-- PAGE 1: DASHBOARD -->
+<div id="dashboard" class="page active">
+  <div class="grid-container">
+    <div class="left" style="background-color:#aaa;">
+      <!-- Konten DASHBOARD di sini -->
+      <select id="monthSelector">
+        <option value="0">Januari</option>
+        <option value="1">Februari</option>
+        <option value="2">Maret</option>
+        <option value="3">April</option>
+        <option value="4">Mei</option>
+        <option value="5">Juni</option>
+        <option value="6">Juli</option>
+        <option value="7">Agustus</option>
+        <option value="8">September</option>
+        <option value="9">Oktober</option>
+        <option value="10">November</option>
+        <option value="11">Desember</option>
+      </select>
+      <canvas id="kpiChart"></canvas>
     </div>
 
-    <div class="row">
-      <div class="column side" style="background-color:#bbb;">
-        <canvas id="donutChart" width="300" height="300"></canvas>
+    <div class="middle" style="background-color:#bbb;">
+      <!-- Konten DASHBOARD di sini -->
+      <div class="test_container">
+        <div class="tolisChartgrid">
+          <div><strong>KC  TOLITOLI</strong></div>
+          <canvas id="trend-T.TOLIS" width="300"></canvas>
+        </div>
+        <div class="bangkirChartgrid">
+          <div><strong>ULP BANGKIR</strong></div>
+          <canvas id="trend-T.BANGKIR" width="300"></canvas>
+        </div>
+        <div class="kotarayaChartgrid">
+          <div><strong>ULP KOTARAYA</strong></div>
+          <canvas id="trend-T.KOTARAYA" width="300"></canvas>
+        </div>
+        <div class="leokChartgrid">
+          <div><strong>ULP LEOK</strong></div>
+          <canvas id="trend-T.LEOK" width="300" ></canvas>
+        </div>
+        <div class="moutongChartgrid">
+          <div><strong>ULP MOUTONG</strong></div>
+          <canvas id="trend-T.MOUTONG" width="300"></canvas>
+        </div>
       </div>
-      
-      <div class="column side" style="background-color:#bbb; align-items: center; justify-content: center;">
+
+      <div class="row">
+        <div class="column side" style="background-color:#bbb;">
+          <canvas id="donutChart" width="300" height="300"></canvas>
+        </div>
         
-        <div class="card">
-          <div class="circle" style="background-color: lime;"></div>
-          <div class="text">
-            <div style="font-size: 11px;">KPI: <b id="greenKPIValue" style="font-size: 16px;">6</b></div>
-            <hr>
-            <div style="font-size: 11px;">PI&nbsp;&nbsp;: <b id="greenPIValue" style="font-size: 16px;"></b></div>
+        <div class="column side" style="background-color:#bbb; align-items: center; justify-content: center;">
+          
+          <div class="card">
+            <div class="circle" style="background-color: lime;"></div>
+            <div class="text">
+              <div style="font-size: 11px;">KPI: <b id="greenKPIValue" style="font-size: 16px;">6</b></div>
+              <hr>
+              <div style="font-size: 11px;">PI&nbsp;&nbsp;: <b id="greenPIValue" style="font-size: 16px;"></b></div>
+            </div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="circle" style="background-color: orange;"></div>
-          <div class="text">
-            <div style="font-size: 11px;">KPI: <b id="yellowKPIValue" style="font-size: 16px;">0</b></div>
-            <hr>
-            <div style="font-size: 11px;">PI&nbsp;&nbsp;: <b id="yellowPIValue" style="font-size: 16px;">0</b></div>
+          <div class="card">
+            <div class="circle" style="background-color: orange;"></div>
+            <div class="text">
+              <div style="font-size: 11px;">KPI: <b id="yellowKPIValue" style="font-size: 16px;">0</b></div>
+              <hr>
+              <div style="font-size: 11px;">PI&nbsp;&nbsp;: <b id="yellowPIValue" style="font-size: 16px;">0</b></div>
+            </div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="circle" style="background-color: red;"></div>
-          <div class="text">
-            <div style="font-size: 11px;">KPI: <b id="redKPIValue" style="font-size: 16px;">0</b></div>
-            <hr>
-            <div style="font-size: 11px;">PI&nbsp;&nbsp;: <b id="redPIValue" style="font-size: 16px;">0</b></div>
+          <div class="card">
+            <div class="circle" style="background-color: red;"></div>
+            <div class="text">
+              <div style="font-size: 11px;">KPI: <b id="redKPIValue" style="font-size: 16px;">0</b></div>
+              <hr>
+              <div style="font-size: 11px;">PI&nbsp;&nbsp;: <b id="redPIValue" style="font-size: 16px;">0</b></div>
+            </div>
           </div>
-        </div>
 
-      </div>
-        <div class="column middle" style="background-color:#bbb;">
-          <canvas id="underTargetChart"></canvas>
         </div>
-    </div>
+          <div class="column middle" style="background-color:#bbb;">
+            <canvas id="underTargetChart"></canvas>
+          </div>
+      </div>
 
-    <div class="row">
-      <div class="column botmid" style="background-color:#bbb;"> 
-        <canvas id="trendBottomChart"></canvas>
+      <div class="row">
+        <div class="column botmid" style="background-color:#bbb;"> 
+          <canvas id="trendBottomChart"></canvas>
+        </div>
+        <div class="column botside" style="background-color:#bbb;">
+           <img src="https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/BERSINAR%20LOGO.png" alt="Bersinar Logo" style="max-width: 100%; height: auto; padding: 10px;">
+        </div>
       </div>
-      <div class="column botside" style="background-color:#bbb;">
-         <img src="https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/BERSINAR%20LOGO.png" alt="Bersinar Logo" style="max-width: 100%; height: auto; padding: 10px;">
-      </div>
-    </div>
-   </div>  
+     </div>  
+  </div>
 </div>
 
-<script>
-  const excelURL = "https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/NKO%20UP3%20TLI.xlsx";
+<!-- PAGE 2: INDICATOR -->
+<div id="indicator" class="page">
+  <div class="grid-container">
+    <div class="left" style="background-color:#ccc;">
+      <h2>INDICATOR Page</h2>
+    </div>
 
-  let indicatorNames = [];
-  let monthMatrix = [];
-  let chart;
+    <div class="middle" style="background-color:#ddd;">
+      <h2>Statistik Indikator</h2>
+    </div>
+  </div>
+</div>
 
-  let tolisValues = [];
-  let tolisTrendChart;
+<!-- PAGE 3: ULP -->
+<div id="ulp" class="page">
+  <div class="grid-container">
+    <div class="left" style="background-color:#eee;">
+      <h2>Unit Layanan Pelanggan</h2>
+    </div>
+    <div class="middle" style="background-color:#fff;">
+      <h2>ULP Content</h2>
+    </div>
+  </div>
+</div>
 
-  fetch(excelURL)
-    .then(r => r.arrayBuffer())
-    .then(buf => {
-      const wb = XLSX.read(buf, { type: "array" });
-      const sheet = wb.Sheets["T.UP3"];
-      const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:BL62" });
+<!-- PAGE 4: DATA -->
+<div id="data" class="page">
+  <div class="grid-container">
+    <div class="left" style="background-color:#f0f0f0;">
+      <h2>Data</h2>
+    </div>
+    <div class="middle" style="background-color:#fafafa;">
+      <h2>Data Content</h2>
+    </div>
+  </div>
+</div>
 
-      indicatorNames = raw.map(r => r[0]);
-      filterIndicator = raw.map(r => r[1]);
-      monthMatrix = raw.map(r => r.slice(7, 19));
+<!-- Import libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
-      // Sheet T.TOLIS untuk grafik ringkasan
-      const sheetNames = ["T.TOLIS","T.BANGKIR","T.KOTARAYA","T.LEOK","T.MOUTONG"];
-      const trendData = {};      // { "T.TOLIS": [...], ... }
-      const trendCharts = {};    // store Chart instances
-
-      sheetNames.forEach(name => {
-        const sh = wb.Sheets[name];
-        if (!sh) {
-          trendData[name] = Array(13).fill(0);
-          return;
-        }
-        const arr = XLSX.utils.sheet_to_json(sh, { header: 1, range: "BW55:CH55" })[0] || [];
-        trendData[name] = arr.map(v => Number(v ?? 0));
-      });
-
-      // buat chart untuk setiap sheet (initial month 0)
-      function buildOrUpdateTrend(name) {
-        const canvasId = "trend-" + name;
-        const el = document.getElementById(canvasId);
-        if (!el) return;
-        const fullLabels = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"," "];
-        const src = trendData[name] || Array(13).fill(null);
-        
-        const values = src.map(v => Number(v ?? 0));
-
-        if (trendCharts[name]) {
-          trendCharts[name].data.datasets[0].data = values;
-          trendCharts[name].update();
-          return;
-        }
-
-        const ctxEl = el; // el adalah elemen <canvas>
-        const DPR = window.devicePixelRatio || 1;
-        // atur tinggi visual (sama seperti CSS .tolisChartgrid canvas height)
-        const visualH = parseInt(getComputedStyle(el).height, 10) || 120;
-        el.style.height = visualH + 'px';
-        // set drawing buffer ukuran (piksel device) agar tajam
-        el.width = Math.round(el.clientWidth * DPR);
-        el.height = Math.round(visualH * DPR);
-
-        // buat chart non-responsive (kita sudah set ukuran buffer)
-        trendCharts[name] = new Chart(el.getContext('2d'), {
-          type: 'line',
-          data: { labels: fullLabels, datasets: [{ data: values, borderColor: "#0077ff", borderWidth: 2, pointRadius: 4, pointBackgroundColor: "#0077ff", spanGaps: false }]},
-          plugins: [ChartDataLabels],
-          options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            scales: {
-              y: { beginAtZero: true, max: 120, grid: { display: false }, ticks: { display: false } },
-              x: { grid: { display: false }, ticks: { display: false } }
-            },
-            plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "top", formatter: v => v!==null? Math.round(v):"", font:{ weight:"bold", size:10 } } }
-          }
-        });
-      }
-
-      updateChart(0);
-      // build all 5 trend charts (tampilkan penuh Jan–Des)
-      sheetNames.forEach(name => buildOrUpdateTrend(name));
-    });
-
-  function updateChart(monthIndex) {
-    const filteredNames = [];
-    const filteredValues = [];
-
-    let greenKPI = 0;
-    let yellowKPI = 0;
-    let redKPI = 0;
-
-    let greenPI = 0;
-    let yellowPI = 0;
-    let redPI = 0;
-
-    for (let i = 0; i < indicatorNames.length; i++) {
-      const filterFlag = filterIndicator[i];
-      const val = monthMatrix[i][monthIndex];
-
-      // Skip yang flag kolom AU nya KOSONG
-      if (filterFlag === "" || filterFlag === null || filterFlag === undefined) continue;
-
-      // Tetap tampilkan meskipun nilai 0
-      const value = Number(val ?? 0);
-
-      let label = indicatorNames[i];
-      if (label.length > 30) label = label.substring(0, 30) + "...";
-
-      filteredNames.push(label);
-      filteredValues.push(value);
-    }
-
-    // Hitung greenKPI, yellowKPI, redKPI, dll.
-    for (let i = 0; i < filteredValues.length; i++) {
-      const value = filteredValues[i];
-
-      if (i < 7) {
-        if (value >= 100) {
-          greenKPI++;
-        } else if (value >= 95) {
-          yellowKPI++;
-        } else {
-          redKPI++;
-        }
-      } else {
-        if (value >= 100) {
-          greenPI++;
-        } else if (value >= 95) {
-          yellowPI++;
-        } else {
-          redPI++;
-        }
-      }
-    }
-
-    console.log("Green KPI:", greenKPI);
-    console.log("Green PI:", greenPI);
-
-    // Update nilai KPI di card
-    document.getElementById("greenKPIValue").innerText = greenKPI; // Update nilai greenKPI
-    document.getElementById("greenPIValue").innerText = greenPI; // Update nilai greenKPI
-    document.getElementById("yellowKPIValue").innerText = yellowKPI; // Update nilai yellowKPI
-    document.getElementById("yellowPIValue").innerText = yellowPI; // Update nilai yellowPI
-    document.getElementById("redKPIValue").innerText = redKPI; // Update nilai redKPI
-    document.getElementById("redPIValue").innerText = redPI; // Update nilai redPI
-
-    // Hitung total indikator
-    const totalIndicators = greenKPI + yellowKPI + redKPI + greenPI + yellowPI + redPI;
-
-    // Data untuk donut chart
-    const donutData = {
-      labels: ['Green KPI', 'Yellow KPI', 'Red KPI'],
-      datasets: [{
-        data: [greenKPI + greenPI, yellowKPI + yellowPI, redKPI + redPI],
-        backgroundColor: ['#4caf50', '#ff9800', '#f44336'],
-        hoverOffset: 4
-      }]
-    };
-
-    // Buat donut chart
-    const donutCtx = document.getElementById('donutChart').getContext('2d');
-    if (window.donutChart && typeof window.donutChart.destroy === 'function') {
-      window.donutChart.destroy(); // Hancurkan chart sebelumnya jika ada
-    }
-
-    const totalFormatted = totalIndicators.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); // contoh "102,3"
-
-    window.donutChart = new Chart(donutCtx, {
-      type: 'doughnut',
-      data: donutData,
-      plugins: [
-        // plugin custom untuk gambar teks di tengah
-        {
-          id: 'centerText',
-          beforeDraw(chart, args, options) {
-            const { ctx, chartArea: { left, right, top, bottom } } = chart;
-            const centerX = (left + right) / 2;
-            const centerY = (top + bottom) / 2;
-            ctx.save();
-
-            // angka besar (total)
-            ctx.fillStyle = options.color || '#333';
-            ctx.font = `${options.fontWeight || 'bold'} ${options.fontSize || '40px'} ${options.fontFamily || 'Arial'}`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(options.text || '', centerX, centerY - (options.offsetY || 6));
-
-            // sublabel (kata "INDICATOR")
-            if (options.subtext) {
-              ctx.fillStyle = options.subColor || '#0077cc';
-              ctx.font = `${options.subFontWeight || '600'} ${options.subFontSize || '14px'} ${options.fontFamily || 'Arial'}`;
-              ctx.fillText(options.subtext, centerX, centerY + (options.subOffsetY || 26));
-            }
-
-            ctx.restore();
-          }
-        }
-      ],
-      options: {
-        responsive: true,
-        cutout: '70%',
-        elements: { arc: { borderWidth: 2 } },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function (tooltipItem) {
-                const label = tooltipItem.label || '';
-                const value = tooltipItem.raw || 0;
-                return `${label}: ${value} (${((value / totalIndicators) * 100).toFixed(2)}%)`;
-              }
-            }
-          },
-          datalabels: { display: false },
-          // konfigurasi plugin centerText (opsi dikirim ke plugin custom di atas)
-          centerText: {
-            text: totalFormatted,        // mis. "102,3"
-            subtext: 'INDICATOR',
-            color: '#333',
-            subColor: '#0077cc',
-            fontSize: '40px',
-            subFontSize: '14px'
-          }
-        }
-      }
-    });
-
-    const colors = filteredValues.map(v => {
-      if (v >= 100) return "green";
-      if (v >= 95) return "orange";
-      return "red";
-    });
-
-    const canvas = document.getElementById("kpiChart");
-    canvas.height = filteredNames.length * 18;
-
-    if (chart) chart.destroy();
-    const ctx = canvas.getContext("2d");
-
-    chart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: filteredNames,
-        datasets: [{
-          data: filteredValues,
-          backgroundColor: colors,
-          barPercentage: 0.7,
-          categoryPercentage: 0.7
-        }]
-      },
-      plugins: [ChartDataLabels],
-      options: {
-        indexAxis: 'y',
-        maintainAspectRatio: false,
-        layout: {
-          padding: {
-          right: 0, // hilangkan ruang kanan tambahan
-          left: 0
-          }
-        },
-        scales: {
-          x: { beginAtZero: true, max: 130, grid: { display: false }, ticks: { display: false }},
-          y: { ticks: { font: { size: 11 }}, grid: { display: false }}
-        },
-        plugins: {
-          legend: { display: false },
-          datalabels: {
-            anchor: "end",
-            align: "right",
-            formatter: value => value.toFixed(2),
-            font: { size: 11, weight: "bold" },
-            color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex]
-          }
-        }
-      }
-    });
-
-      // Buat bar chart untuk indikator dibawah target (kuning & merah saja, tanpa sort)
-      const underTargetIndices = [];
-      const underTargetNames = [];
-      const underTargetValues = [];
-      const underTargetColors = [];
-
-      filteredNames.forEach((name, i) => {
-        const value = filteredValues[i];
-        if (value < 100) { // kuning (95-99) atau merah (< 95)
-          underTargetNames.push(name);
-          underTargetValues.push(value);
-          if (value >= 95) {
-            underTargetColors.push("orange");
-          } else {
-            underTargetColors.push("red");
-          }
-        }
-      });
-
-      const underTargetCanvas = document.getElementById('underTargetChart');
-      if (!underTargetCanvas) {
-        console.warn('Canvas underTargetChart tidak ditemukan');
-        return;
-      }
-
-      underTargetCanvas.height = underTargetNames.length * 18;
-
-      const underTargetCtx = underTargetCanvas.getContext('2d');
-      if (window.underTargetChart && typeof window.underTargetChart.destroy === 'function') {
-        window.underTargetChart.destroy();
-      }
-
-      window.underTargetChart = new Chart(underTargetCtx, {
-        type: 'bar',
-        data: {
-          labels: underTargetNames,
-          datasets: [{
-            data: underTargetValues,
-            backgroundColor: underTargetColors,
-            barPercentage: 0.7,
-            categoryPercentage: 0.7
-          }]
-        },
-        plugins: [ChartDataLabels],
-        options: {
-          indexAxis: 'y',
-          maintainAspectRatio: false,
-          layout: {
-            padding: {
-              right: 0,
-              left: 0
-            }
-          },
-          scales: {
-            x: { beginAtZero: true, max: 125, grid: { display: false }, ticks: { display: false } },
-            y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-          },
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: 'end',
-              align: 'right',
-              formatter: value => value.toFixed(2),
-              font: { size: 11, weight: 'bold' },
-              color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex]
-            }
-          }
-        }
-      });
-
-      // Buat bar chart dari data T.UP3 BW69:CH69 (tren indikator)
-      fetch(excelURL)
-        .then(r => r.arrayBuffer())
-        .then(buf => {
-          const wb = XLSX.read(buf, { type: "array" });
-          const sheet = wb.Sheets["T.UP3"];
-          
-          const trendBottomData = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "BW69:CH69" })[0] || [];
-          const monthLabels = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
-          const trendValues = trendBottomData.map(v => Number(v ?? 0));
-
-          const trendBottomCanvas = document.getElementById('trendBottomChart');
-          if (!trendBottomCanvas) {
-            console.warn('Canvas trendBottomChart tidak ditemukan');
-            return;
-          }
-
-          const trendBottomCtx = trendBottomCanvas.getContext('2d');
-          if (window.trendBottomChart && typeof window.trendBottomChart.destroy === 'function') {
-            window.trendBottomChart.destroy();
-          }
-
-          window.trendBottomChart = new Chart(trendBottomCtx, {
-            type: 'bar',
-            data: {
-              labels: monthLabels,
-              datasets: [{
-                label: 'Tren Indikator',
-                data: trendValues,
-                backgroundColor: '#0077ff',
-                borderColor: '#0055cc',
-                borderWidth: 1,
-               barPercentage: 0.5,        // kurangi lebar bar (default 0.9)
-               categoryPercentage: 0.7    // kurangi gap antar kategori
-              }]
-            },
-            plugins: [ChartDataLabels],
-            options: {
-              responsive: true,
-              maintainAspectRatio: true,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  max: 130,
-                  grid: { display: false },
-                  ticks: { display: false }
-                },
-                x: {
-                  grid: { display: false },
-                  ticks: { font: { size: 11 } }
-                }
-              },
-              plugins: {
-                legend: { display: false },
-                datalabels: {
-                  anchor: 'end',
-                  align: 'top',
-                  formatter: value => value.toFixed(2),
-                  font: { size: 10, weight: 'bold' },
-                  color: '#000'  // Orange terang agar terlihat
-                }
-              }
-            }
-          });
-        });
-  }
-
-  document.getElementById("monthSelector").addEventListener("change", e => {
-    const m = parseInt(e.target.value);
-    updateChart(m);
-  });
-</script>
+<!-- Import custom script -->
+<script src="script.js"></script>
 
 </body>
 
