@@ -105,7 +105,25 @@ ul li a:hover {
 .kotarayaChartgrid,
 .leokChartgrid,
 .moutongChartgrid{
+  display: flex;
+  flex-direction: column;    /* susun card + canvas vertikal */
+  align-items: center;       /* center horizontal */
+  justify-content: center;   /* center vertikal */
+  gap: 8px;                  /* jarak antar elemen */
   padding: 10px;
+  box-sizing: border-box;
+}
+
+/* pastikan canvas di dalam grid tidak melebar melebihi container */
+.tolisChartgrid canvas,
+.bangkirChartgrid canvas,
+.kotarayaChartgrid canvas,
+.leokChartgrid canvas,
+.moutongChartgrid canvas{
+  display: block;
+  width: 300px;    /* tetap 300px sesuai markup, ubah jika perlu responsif */
+  max-width: 100%;
+  height: auto;
 }
 
 /* Container for flexboxes */
@@ -117,7 +135,6 @@ ul li a:hover {
 /* Create three unequal columns that sits next to each other */
 .column {
   padding: 10px;
-  height: 300px; /* Should be removed. Only for demonstration */
 }
 
 /* Left and right column */
@@ -274,9 +291,9 @@ ul li a.active {
 <!-- PAGE 1: DASHBOARD -->
 <div id="dashboard" class="page active">
   <div class="grid-container">
-    <div class="left" style="background-color:#aaa;">
+    <div class="left" style="background-color:#aaa; height: 100vh;">
       <!-- Konten DASHBOARD di sini -->
-      <select id="monthSelector">
+      <select id="monthSelector" class="monthSelector">
         <option value="0">Januari</option>
         <option value="1">Februari</option>
         <option value="2">Maret</option>
@@ -290,37 +307,63 @@ ul li a.active {
         <option value="10">November</option>
         <option value="11">Desember</option>
       </select>
-      <canvas id="kpiChart"></canvas>
+      <canvas id="kpiChart" class="kpiChart"; style="align-items: center; text-align: center;"></canvas>
     </div>
 
-    <div class="middle" style="background-color:#bbb;">
+    <div class="middle" style="background-color:#bbb; height: 100vh; align-items: center; text-align: center;">
       <!-- Konten DASHBOARD di sini -->
       <div class="test_container">
         <div class="tolisChartgrid">
-          <div><strong>KC  TOLITOLI</strong></div>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>KC  TOLITOLI</strong>
+          </div>
           <canvas id="trend-T.TOLIS" width="300"></canvas>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>56</strong>
+          </div>
         </div>
         <div class="bangkirChartgrid">
-          <div><strong>ULP BANGKIR</strong></div>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>ULP BANGKIR</strong>
+          </div>
           <canvas id="trend-T.BANGKIR" width="300"></canvas>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>56</strong>
+          </div>          
         </div>
         <div class="kotarayaChartgrid">
-          <div><strong>ULP KOTARAYA</strong></div>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>ULP KOTARAYA</strong>
+          </div>
           <canvas id="trend-T.KOTARAYA" width="300"></canvas>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>56</strong>
+          </div>
         </div>
         <div class="leokChartgrid">
-          <div><strong>ULP LEOK</strong></div>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>ULP LEOK</strong>
+          </div>
           <canvas id="trend-T.LEOK" width="300" ></canvas>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>56</strong>
+          </div>
         </div>
         <div class="moutongChartgrid">
-          <div><strong>ULP MOUTONG</strong></div>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>ULP MOUOTNG</strong>
+          </div>
           <canvas id="trend-T.MOUTONG" width="300"></canvas>
+          <div class="card"; style="justify-content: center; align-items: center;">
+            <strong>56</strong>
+          </div>
         </div>
+
       </div>
 
       <div class="row">
         <div class="column side" style="background-color:#bbb;">
-          <canvas id="donutChart" width="300" height="300"></canvas>
+          <canvas id="donutChart" width="300px" height="300px"></canvas>
         </div>
         
         <div class="column side" style="background-color:#bbb; align-items: center; justify-content: center;">
@@ -359,7 +402,7 @@ ul li a.active {
       </div>
 
       <div class="row">
-        <div class="column botmid" style="background-color:#bbb;"> 
+        <div class="column botmid" style="background-color:#bbb; height: 300px;"> 
           <canvas id="trendBottomChart"></canvas>
         </div>
         <div class="column botside" style="background-color:#bbb;">
@@ -373,12 +416,30 @@ ul li a.active {
 <!-- PAGE 2: INDICATOR -->
 <div id="indicator" class="page">
   <div class="grid-container">
-    <div class="left" style="background-color:#ccc;">
-      <h2>INDICATOR Page</h2>
+    <div class="left" style="background-color:#ccc; height: 100vh;">
+      <select id="monthSelectorPage2" class="monthSelector">
+        <option value="0">Januari</option>
+        <option value="1">Februari</option>
+        <option value="2">Maret</option>
+        <option value="3">April</option>
+        <option value="4">Mei</option>
+        <option value="5">Juni</option>
+        <option value="6">Juli</option>
+        <option value="7">Agustus</option>
+        <option value="8">September</option>
+        <option value="9">Oktober</option>
+        <option value="10">November</option>
+        <option value="11">Desember</option>
+      </select>
+      <canvas id="kpiChartPage2" class="kpiChart"></canvas>
     </div>
 
-    <div class="middle" style="background-color:#ddd;">
-      <h2>Statistik Indikator</h2>
+    <div class="middle" style="background-color:#bbb; height: 100vh; display: flex; flex-direction: column; justify-content: baseline; align-items: center; text-align: center;">
+      <select id="indicatorSelector" class="myindicatorSelector" style="width: 100vw;"></select>
+
+      <canvas id="indicatorChartCanvas" style="max-height: 250px; max-width: 90%; width: 100%; margin-top: 20px;"></canvas>
+      <canvas id="indicator2ChartCanvas" style="max-height: 250px; max-width: 90%; width: 100%; margin-top: 20px;"></canvas>
+
     </div>
   </div>
 </div>

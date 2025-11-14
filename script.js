@@ -5,6 +5,10 @@ let monthMatrix = [];
 let chart;
 let filterIndicator = [];
 
+let realizedIndicator = [];
+let targetIndicator = [];
+let realizedPercentageIndicator = [];
+
 let tolisValues = [];
 let tolisTrendChart;
 let trendBottomRow = []; // <-- simpan nilai BW69:CH69
@@ -18,11 +22,21 @@ async function loadExcelData() {
     
     // Load T.UP3 sheet
     const sheet = wb.Sheets["T.UP3"];
-    const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:BL62" });
+    const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "AT8:BL68" });
 
     indicatorNames = raw.map(r => r[0]);
     filterIndicator = raw.map(r => r[1]);
     monthMatrix = raw.map(r => r.slice(7, 19));
+
+    const realizedRaw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "X8:AP68" });
+    realizedIndicator = realizedRaw.map(r => r.slice(7, 19));
+
+    const targetRaw = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "B8:T68" });
+    targetIndicator = targetRaw.map(r => r.slice(7, 19));
+
+    targetPercentageIndicator = targetIndicator.map(row => 
+      row.map(() => 100)
+    );
 
     // baca nilai pusat (BW69:CH69) sekali dan simpan
     const bwRow = XLSX.utils.sheet_to_json(sheet, { header: 1, range: "BW69:CH69" })[0] || [];
@@ -109,9 +123,65 @@ function buildOrUpdateTrend(name, trendData, trendCharts) {
   });
 }
 
+window.chartInstances = window.chartInstances || {};
+
+// generic create/update KPI chart on given canvas id
+function createKPIOnCanvas(canvasId, names, values) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.height = names.length * 18;
+  const ctx = canvas.getContext("2d");
+
+  // destroy previous instance untuk canvas ini jika ada
+  if (window.chartInstances[canvasId] && typeof window.chartInstances[canvasId].destroy === "function") {
+    window.chartInstances[canvasId].destroy();
+  }
+
+  const colors = values.map(v => {
+    if (v >= 100) return "green";
+    if (v >= 95) return "orange";
+    return "red";
+  });
+
+  window.chartInstances[canvasId] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: names,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        barPercentage: 0.5,
+        categoryPercentage: 0.7
+      }]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      indexAxis: 'y',
+      maintainAspectRatio: false,
+      layout: { padding: { right: 0, left: 0 } },
+      scales: {
+        x: { beginAtZero: true, max: 130, grid: { display: false }, ticks: { display: false } },
+        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: "end",
+          align: "right",
+          formatter: value => value.toFixed(2),
+          font: { size: 13, weight: "bold" },
+          color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex]
+        }
+      }
+    }
+  });
+}
+
+// panggil dari updateChart agar kedua canvas ter-update
 function updateChart(monthIndex) {
   const filteredNames = [];
   const filteredValues = [];
+  const filteredFullNames = []; // simpan nama penuh untuk selector
 
   let greenKPI = 0, yellowKPI = 0, redKPI = 0;
   let greenPI = 0, yellowPI = 0, redPI = 0;
@@ -123,12 +193,18 @@ function updateChart(monthIndex) {
     if (filterFlag === "" || filterFlag === null || filterFlag === undefined) continue;
 
     const value = Number(val ?? 0);
-    let label = indicatorNames[i];
-    if (label.length > 30) label = label.substring(0, 30) + "...";
+    const fullLabel = indicatorNames[i] || "";                // nama penuh
+    let shortLabel = fullLabel;
+    if (shortLabel.length > 30) shortLabel = shortLabel.substring(0, 30) + "..."; // nama terpotong untuk chart
 
-    filteredNames.push(label);
+    filteredFullNames.push(fullLabel);
+    filteredNames.push(shortLabel); // untuk chart
     filteredValues.push(value);
   }
+
+  // simpan hasil terakhir ke global agar listener luar bisa mengakses nama penuh & nilai
+  window.currentFilteredFullNames = filteredFullNames;
+  window.currentFilteredValues = filteredValues;
 
   // Count indicators by category
   for (let i = 0; i < filteredValues.length; i++) {
@@ -162,14 +238,37 @@ function updateChart(monthIndex) {
     : null;
   createDonutChart(greenKPI, yellowKPI, redKPI, greenPI, yellowPI, redPI, totalIndicators, centerSheetValue);
 
-  // Create main bar chart
-  createKPIChart(filteredNames, filteredValues);
+  // Create main bar chart (menggunakan short labels)
+  createKPIOnCanvas("kpiChart", filteredNames, filteredValues);
+  createKPIOnCanvas("kpiChartPage2", filteredNames, filteredValues); // untuk page 2
 
   // Create under-target bar chart
   createUnderTargetChart(filteredNames, filteredValues);
 
   // Create trend bottom chart
   createTrendBottomChart();
+
+  // after building filteredNames and filteredValues
+  // isi selector indikator (pakai nama penuh)
+  const indicatorSel = document.getElementById('indicatorSelector');
+  if (indicatorSel) {
+    const prevValue = indicatorSel.value; // simpan pilihan sebelumnya jika ada
+    indicatorSel.innerHTML = ''; // kosongkan
+    filteredFullNames.forEach((name, idx) => {
+      const opt = document.createElement('option');
+      opt.value = String(idx); // index sama dengan nilai pada filteredValues
+      opt.text = name;         // tampilkan nama penuh
+      indicatorSel.appendChild(opt);
+    });
+    // restore previous selection jika masih valid, kalau tidak set ke 0
+    if (prevValue && Array.from(indicatorSel.options).some(o => o.value === prevValue)) {
+      indicatorSel.value = prevValue;
+    } else {
+      indicatorSel.selectedIndex = 0;
+    }
+    // (opsional) dispatch change agar listener lain bereaksi:
+    indicatorSel.dispatchEvent(new Event('change'));
+  }
 }
 
 function createDonutChart(gKPI, yKPI, rKPI, gPI, yPI, rPI, total, totalFromSheet) {
@@ -194,6 +293,7 @@ function createDonutChart(gKPI, yKPI, rKPI, gPI, yPI, rPI, total, totalFromSheet
     },
     plugins: [
       {
+        maintainAspectRatio: true,
         id: 'centerText',
         beforeDraw(chart, args, options) {
           const { ctx, chartArea: { left, right, top, bottom } } = chart;
@@ -240,53 +340,6 @@ function createDonutChart(gKPI, yKPI, rKPI, gPI, yPI, rPI, total, totalFromSheet
           subColor: '#0077cc',
           fontSize: '40px',
           subFontSize: '14px'
-        }
-      }
-    }
-  });
-}
-
-function createKPIChart(names, values) {
-  const colors = values.map(v => {
-    if (v >= 100) return "green";
-    if (v >= 95) return "orange";
-    return "red";
-  });
-
-  const canvas = document.getElementById("kpiChart");
-  canvas.height = names.length * 18;
-
-  if (chart) chart.destroy();
-  const ctx = canvas.getContext("2d");
-
-  chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: names,
-      datasets: [{
-        data: values,
-        backgroundColor: colors,
-        barPercentage: 0.7,
-        categoryPercentage: 0.7
-      }]
-    },
-    plugins: [ChartDataLabels],
-    options: {
-      indexAxis: 'y',
-      maintainAspectRatio: false,
-      layout: { padding: { right: 0, left: 0 } },
-      scales: {
-        x: { beginAtZero: true, max: 130, grid: { display: false }, ticks: { display: false } },
-        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-      },
-      plugins: {
-        legend: { display: false },
-        datalabels: {
-          anchor: "end",
-          align: "right",
-          formatter: value => value.toFixed(2),
-          font: { size: 11, weight: "bold" },
-          color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex]
         }
       }
     }
@@ -408,23 +461,134 @@ async function createTrendBottomChart() {
   }
 }
 
+function indicatorChart(indicatorSel, indicatorNames, percentage, values, targetValue, canvasId) {
+  const chart_realizedIndicator = [];
+  const chart_targetIndicator = [];
+  const chart_percentageIndicator = [];
+
+  for (let i = 0; i < indicatorNames.length; i++) {
+    if (indicatorSel == indicatorNames[i]) {
+      chart_realizedIndicator.push(values[i]);
+      chart_targetIndicator.push(targetValue[i]);
+      chart_percentageIndicator.push(percentage[i]);
+
+      console.log("indicator matched:", indicatorSel, "==", chart_realizedIndicator[0]);
+    }
+  }
+
+  maxValue = 0;
+  const maxValueRealized = Math.max(...chart_realizedIndicator[0]);
+  const maxValueTarget = Math.max(...chart_targetIndicator[0]);
+
+  if (maxValueRealized > maxValueTarget) {
+    maxValue = maxValueRealized;
+  } else {
+    maxValue = maxValueTarget;
+  }
+
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  if (!window.indicatorChartInstances) {
+    window.indicatorChartInstances = {};
+  }
+
+  if (window.indicatorChartInstances[canvasId]) {
+    window.indicatorChartInstances[canvasId].destroy();
+  }
+
+  const colors = chart_percentageIndicator[0].map(v => {
+    if (v >= 100) return "green";
+    if (v >= 95) return "orange";
+    return "red";
+  });
+
+  window.indicatorChartInstances[canvasId] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
+      datasets: [
+      {
+        label: "Realisasi Indikator",
+        data: chart_realizedIndicator[0],
+        borderColor: "#0077ff",
+        backgroundColor: colors,
+        borderWidth: 0,
+        barPercentage: 0.5,
+        categoryPercentage: 0.7,
+        order: 2
+      },
+      {
+        // Line chart - Target (opsional, bisa disesuaikan)
+          type: "line",
+          label: "Target Indikator",
+          data: chart_targetIndicator[0],  // atau sesuai target aktual
+          borderColor: "#f44336",
+          backgroundColor: "rgba(244, 67, 54, 0.1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointBackgroundColor: "#f44336",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2,
+          tension: 0.4,  // smoothness kurva
+          order: 1,  // tampilkan di depan bar
+          datalabels: { display: false}  // sembunyikan data label untuk line
+      }]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, max: maxValue + 10, grid: { display: false }, ticks: { display: false } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: value => value.toFixed(2),
+          font: { size: 12, weight: 'bold' },
+          color: '#000'
+        },
+      }
+    }
+  });
+        
+    
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
   console.log("DOM Loaded - Starting initialization");
   
   loadExcelData();
-  showPage('dashboard', null);  // Kirim null untuk initial load
+  showPage('dashboard', null);
 
-  // Tambahkan event listener untuk monthSelector
-  const monthSelector = document.getElementById("monthSelector");
-  if (monthSelector) {
-    monthSelector.addEventListener("change", function(e) {
+  // attach listeners to all month selectors (sync them)
+  document.querySelectorAll('.monthSelector').forEach(sel => {
+    sel.addEventListener('change', function(e) {
       const m = parseInt(e.target.value);
+      // sync value to all selectors
+      document.querySelectorAll('.monthSelector').forEach(s => { if (s.value !== String(m)) s.value = String(m); });
       console.log("Month changed to:", m);
       updateChart(m);
     });
-  } else {
-    console.error("monthSelector element not found!");
+  });
+
+  const indicatorSel = document.getElementById('indicatorSelector');
+  if (indicatorSel) {
+    indicatorSel.addEventListener('change', function(e) {
+      const idx = parseInt(e.target.value);
+      const names = window.currentFilteredFullNames || [];
+      const vals = window.currentFilteredValues || [];
+      console.log('Indicator selected:', names[idx], vals[idx]);
+
+      indicatorChart(names[idx], indicatorNames, monthMatrix, monthMatrix, targetPercentageIndicator, "indicatorChartCanvas");
+      indicatorChart(names[idx], indicatorNames, monthMatrix, realizedIndicator, targetIndicator, "indicator2ChartCanvas");
+    });
   }
 });
 
