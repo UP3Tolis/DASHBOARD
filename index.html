@@ -128,8 +128,8 @@ ul li a:hover {
 
 /* Container for flexboxes */
 .row {
-  display: -webkit-flex;
   display: flex;
+  flex-wrap: wrap;
 }
 
 /* Create three unequal columns that sits next to each other */
@@ -137,11 +137,35 @@ ul li a:hover {
   padding: 10px;
 }
 
+.column.one{
+  flex: 1;
+  flex-grow: 1;
+  flex-basis: 300px;  
+}
+
+.column.two{
+  flex: 2;
+  flex-grow: 1;
+  flex-basis: 400px;  
+}
+
+.column.three{
+  flex: 3;
+  flex-grow: 1;
+  flex-basis: 300px;  
+}
+
+.column.four{
+  flex: 4;
+  flex-grow: 1;
+  flex-basis: 300px;  
+}
+
 /* Left and right column */
 .column.side {
-   -webkit-flex: 1;
-   -ms-flex: 1;
    flex: 1;
+   flex-grow: 1;
+   flex-basis: 300px;
 }
 
 /* Middle column */
@@ -264,7 +288,7 @@ ul li a.active {
 }
 
 /* Responsive layout */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .grid-container {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -290,8 +314,8 @@ ul li a.active {
 
 <!-- PAGE 1: DASHBOARD -->
 <div id="dashboard" class="page active">
-  <div class="grid-container">
-    <div class="left" style="background-color:#aaa; height: 100vh;">
+  <div class="grid-container" style="background-color:#aaa;">
+    <div class="left" style="background-color:#aaa; height: 100vh; display: flex; flex-direction: column; justify-content: baseline; align-items: center; text-align: center;">
       <!-- Konten DASHBOARD di sini -->
       <select id="monthSelector" class="monthSelector">
         <option value="0">Januari</option>
@@ -312,48 +336,48 @@ ul li a.active {
 
     <div class="middle" style="background-color:#bbb; height: 100vh; align-items: center; text-align: center;">
       <!-- Konten DASHBOARD di sini -->
-      <div class="test_container">
-        <div class="tolisChartgrid">
+      <div class="row">
+        <div class="column one" style="height: 30vh;">
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>KC  TOLITOLI</strong>
           </div>
-          <canvas id="trend-T.TOLIS" width="300"></canvas>
+          <canvas id="trend-T.TOLIS" style="width: 300px; max-height: 20vh;"></canvas>
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>56</strong>
           </div>
         </div>
-        <div class="bangkirChartgrid">
+        <div class="column one" style="height: 33vh;">
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>ULP BANGKIR</strong>
           </div>
-          <canvas id="trend-T.BANGKIR" width="300"></canvas>
+          <canvas id="trend-T.BANGKIR" style="width: 300px; max-height: 20vh;"></canvas>
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>56</strong>
           </div>          
         </div>
-        <div class="kotarayaChartgrid">
+        <div class="column one" style="height: 33vh;">
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>ULP KOTARAYA</strong>
           </div>
-          <canvas id="trend-T.KOTARAYA" width="300"></canvas>
+          <canvas id="trend-T.KOTARAYA" style="width: 300px; max-height: 20vh;"></canvas>
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>56</strong>
           </div>
         </div>
-        <div class="leokChartgrid">
+        <div class="column one" style="height: 33vh;">
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>ULP LEOK</strong>
           </div>
-          <canvas id="trend-T.LEOK" width="300" ></canvas>
+          <canvas id="trend-T.LEOK" style="width: 300px; max-height: 20vh;" ></canvas>
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>56</strong>
           </div>
         </div>
-        <div class="moutongChartgrid">
+        <div class="column one" style="height: 33vh;">
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>ULP MOUOTNG</strong>
           </div>
-          <canvas id="trend-T.MOUTONG" width="300"></canvas>
+          <canvas id="trend-T.MOUTONG" style="width: 300px; max-height: 20vh;"></canvas>
           <div class="card"; style="justify-content: center; align-items: center;">
             <strong>56</strong>
           </div>
@@ -362,11 +386,11 @@ ul li a.active {
       </div>
 
       <div class="row">
-        <div class="column side" style="background-color:#bbb;">
-          <canvas id="donutChart" width="300px" height="300px"></canvas>
+        <div class="column one" style="background-color:#bbb; max-width: 300px; height: fit-content; max-height: 200px;">
+          <canvas id="donutChart" style="width: fit-content;"></canvas>
         </div>
         
-        <div class="column side" style="background-color:#bbb; align-items: center; justify-content: center;">
+        <div class="column one" style="background-color:#bbb; align-items: center; justify-content: center;">
           
           <div class="card">
             <div class="circle" style="background-color: lime;"></div>
@@ -396,17 +420,18 @@ ul li a.active {
           </div>
 
         </div>
-          <div class="column middle" style="background-color:#bbb;">
-            <canvas id="underTargetChart"></canvas>
-          </div>
+
+        <div class="column two" style="background-color:#bbb; display: flex; max-height: 350px; justify-content: center;">
+          <canvas id="underTargetChart" height="100px"></canvas>
+        </div>
       </div>
 
       <div class="row">
-        <div class="column botmid" style="background-color:#bbb; height: 300px;"> 
+        <div class="column four" style="background-color:#bbb; display: flex; width: 90px; max-height: 300px;"> 
           <canvas id="trendBottomChart"></canvas>
         </div>
-        <div class="column botside" style="background-color:#bbb;">
-           <img src="https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/BERSINAR%20LOGO.png" alt="Bersinar Logo" style="max-width: 100%; height: auto; padding: 10px;">
+        <div class="column one" style="background-color:#bbb; max-height: 300px;">
+           <img src="https://raw.githubusercontent.com/UP3Tolis/DASHBOARD/main/BERSINAR%20LOGO.png" alt="Bersinar Logo" style="max-width: 100%; height: 200px; padding: 10px;">
         </div>
       </div>
      </div>  
@@ -416,7 +441,7 @@ ul li a.active {
 <!-- PAGE 2: INDICATOR -->
 <div id="indicator" class="page">
   <div class="grid-container">
-    <div class="left" style="background-color:#ccc; height: 100vh;">
+    <div class="left" style="background-color:#ccc; height: 100vh; display: flex; flex-direction: column; justify-content: baseline; align-items: center; text-align: center;">
       <select id="monthSelectorPage2" class="monthSelector">
         <option value="0">Januari</option>
         <option value="1">Februari</option>
