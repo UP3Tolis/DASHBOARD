@@ -567,6 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadExcelData();
   showPage('dashboard', null);
 
+
   // attach listeners to all month selectors (sync them)
   document.querySelectorAll('.monthSelector').forEach(sel => {
     sel.addEventListener('change', function(e) {
